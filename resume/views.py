@@ -11,17 +11,17 @@ from landing_spot.models import User, Skill, SkillCategory, Project
 def pdf_resume_view(request, username, action):
     # Get the user
     person = get_object_or_404(User, username=username)
-    
+
     # Get the active resume
     resume = person.resumes.filter(is_active=True).first()
     if not resume:
         return HttpResponse("No active resume found for this user.", status=404)
-    
+
     # Get categorized skills
     skill_categories = SkillCategory.objects.prefetch_related(
         Prefetch('skills', queryset=Skill.objects.filter(user=person))
     ).filter(skills__user=person).distinct()
-    
+
     # Resume projects
     projects = Project.objects.filter(
         resume_project__resume=resume
@@ -30,7 +30,7 @@ def pdf_resume_view(request, username, action):
     # Experiences and education
     experiences = person.experiences.all()
     educations = person.educations.all()
-    
+
     # Prepare template context
     context = {
         'person': person,
